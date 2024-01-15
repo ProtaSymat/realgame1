@@ -165,7 +165,7 @@ class MenuScene extends BaseScene {
     openTuto() {
         this.scene.start('TutoScene', {
             musicOn: this.musicOn,
-            returnScene: 'TutoScene'
+            returnScene: 'MainScene'
         });
     }
 }
@@ -233,8 +233,9 @@ class PausedScene extends BaseScene {
         });
         pauseText.setOrigin(0.5, 0.5);
         this.createButton(this.cameras.main.centerX, this.cameras.main.centerY, 'Resume', () => this.resumeGame(data.prevScene));
-        this.createButton(this.cameras.main.centerX, this.cameras.main.centerY + 200, 'Restart', () => this.restartGame(data.prevScene));
-        this.createButton(this.cameras.main.centerX, this.cameras.main.centerY + 400, 'Leave', () => this.quitGame());
+        this.createButton(this.cameras.main.centerX, this.cameras.main.centerY + 150, 'Restart', () => this.restartGame(data.prevScene));
+        this.createButton(this.cameras.main.centerX, this.cameras.main.centerY + 300, 'Tuto', () => this.gotoTuto());
+        this.createButton(this.cameras.main.centerX, this.cameras.main.centerY + 450, 'Leave', () => this.quitGame());
     }
 
     resumeGame(prevScene) {
@@ -247,6 +248,13 @@ class PausedScene extends BaseScene {
       this.scene.start(prevScene);
       this.timer = 0;
   }
+  gotoTuto() {
+    this.scene.start('TutoScene', {
+        musicOn: this.musicOn,
+        returnScene: 'PausedScene'
+    });
+    console.log('fleche touché');
+}
 
     quitGame() {
         this.scene.stop('MainScene');
@@ -259,6 +267,10 @@ class TutoScene extends BaseScene {
         super({
             key: 'TutoScene'
         });
+    }
+
+    init(data) {
+        this.returnScene = data.returnScene;
     }
 
     create() {
@@ -285,7 +297,7 @@ class TutoScene extends BaseScene {
         let bonusDescription = this.add.text(this.cameras.main.width / 4 * 2, this.cameras.main.height / 2 + 390, 'Récoltez la casquette et appuyez sur Ctrl pour utiliser le mode fou d\'Odin. Restez appuyé sur B pour débloquer un power-up spécial.', { font: '20px Arial', fill: '#000000', align: 'center', wordWrap: { width: 700, useAdvancedWrap: true } }).setOrigin(0.5);
         
         const backButton = this.add.image(100, 100, 'backButton').setInteractive().setScale(1.5);
-        backButton.on('pointerdown', () => this.scene.start(this.returnScene));
+    backButton.on('pointerdown', () => this.scene.start(this.returnScene));
     }
 }
 
@@ -557,10 +569,12 @@ class MainScene extends Phaser.Scene {
             let x = Phaser.Math.Between(100, world.width - 100);
             let y = Phaser.Math.Between(100, world.height - 100);
             let enemy = enemies.create(x, y, 'enemy');
+            console.log(enemy);
             enemy.setScale(1.2, 1.2);
             enemy.setCollideWorldBounds(true);
             enemy.setGravityY(2);
             enemy.setVelocityX(-300);
+            enemy.setVelocityY(null);
             enemy.step = -300;
             enemy.anims.play('bee-enemy', true);
 
