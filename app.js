@@ -55,6 +55,7 @@ class PreloadScene extends Phaser.Scene {
         this.load.image('run2-right', 'assets/images/walking2-right.png');
         this.load.image('run1-left', 'assets/images/walking1-left.png');
         this.load.image('run2-left', 'assets/images/walking2-left.png');
+        this.load.image('keyboard', 'assets/images/keyboard.png');
         this.load.image('jump', 'assets/images/jump.png');
         this.load.image('backButton', 'assets/images/backMenu.png');
         this.load.audio('clickSound', 'assets/audio/buttonSoundEffect.mp3');
@@ -146,8 +147,9 @@ class MenuScene extends BaseScene {
         let scaleY = this.cameras.main.height / bg.height;
         let scale = Math.max(scaleX, scaleY);
         bg.setScale(scale).setScrollFactor(0);
-        const playButton = this.createButton(960, 640, 'Play', () => this.startGame());
-        const optionsButton = this.createButton(960, 840, 'Options', () => this.openOptions());
+        const playButton = this.createButton(960, 600, 'Play', () => this.startGame());
+        const optionsButton = this.createButton(960, 750, 'Options', () => this.openOptions());
+        const tutoButton = this.createButton(960, 900, 'Tutoriel', () => this.openTuto());
     }
 
     startGame() {
@@ -158,6 +160,12 @@ class MenuScene extends BaseScene {
         this.scene.start('OptionsScene', {
             musicOn: this.musicOn,
             returnScene: 'MenuScene'
+        });
+    }
+    openTuto() {
+        this.scene.start('TutoScene', {
+            musicOn: this.musicOn,
+            returnScene: 'TutoScene'
         });
     }
 }
@@ -243,6 +251,41 @@ class PausedScene extends BaseScene {
     quitGame() {
         this.scene.stop('MainScene');
         this.scene.start('MenuScene');
+    }
+}
+
+class TutoScene extends BaseScene {
+    constructor() {
+        super({
+            key: 'TutoScene'
+        });
+    }
+
+    create() {
+        let bg = this.add.image(0, 0, 'backgroundOptions').setOrigin(0, 0);
+        let scaleX = this.cameras.main.width / bg.width;
+        let scaleY = this.cameras.main.height / bg.height;
+        let scale = Math.max(scaleX, scaleY);
+        bg.setScale(scale).setScrollFactor(0);
+
+        let title = this.add.text(this.cameras.main.width / 2, 200, 'Tutoriel', { font: '100px', fill: '#000000' }).setOrigin(0.5);
+
+        let touches = this.add.text(this.cameras.main.width / 2, this.cameras.main.height / 2 - 100, 'Touches :', { font: '50px', fill: '#000000' }).setOrigin(0.5, 0.5);
+        let controlImage = this.add.image(this.cameras.main.width / 4, this.cameras.main.height / 2 - 30, 'keyboard').setOrigin(0.5, 0.5);
+        let controlText = this.add.text(this.cameras.main.width / 4 * 2, this.cameras.main.height / 2 - 30, "Les touches pour avancer sont les flèches. Pour sauter, appuyez sur la flèche du haut (un double jump est possible mais il faut savoir le dompter)... en gros c'est mal codé mdrr restez bien sur la plateforme", { font: '20px Arial', fill: '#000000', align: 'center', wordWrap: { width: 700, useAdvancedWrap: true } }).setOrigin(0.5, 0.5);
+
+        let gameObjective = this.add.text(this.cameras.main.width / 2, this.cameras.main.height / 2 + 100, 'But du jeu :', { font: '50px', fill: '#000000' }).setOrigin(0.5);
+        let beeImage = this.add.image(this.cameras.main.width / 4 -50, this.cameras.main.height / 2 + 180, 'enemy').setOrigin(0.5);
+        let coinImage = this.add.image(this.cameras.main.width / 4 + 50, this.cameras.main.height / 2 + 180, 'star').setOrigin(0.5);
+        let gameDescription = this.add.text(this.cameras.main.width / 4 * 2, this.cameras.main.height / 2 + 200, 'Le principe est de tuer tous les enemis en leur sautant dessus et de récolter chaque pièce dans le temps imparti (2:00)', { font: '20px Arial', fill: '#000000', align: 'center', wordWrap: { width: 700, useAdvancedWrap: true } }).setOrigin(0.5);
+
+        let bonus = this.add.text(this.cameras.main.width / 2, this.cameras.main.height / 2 + 300, 'Bonus :', { font: '50px', fill: '#000000' }).setOrigin(0.5);
+        let magicHat = this.add.image(this.cameras.main.width / 4 -50, this.cameras.main.height / 2 + 370, 'magic-cap').setOrigin(0.5);
+        let rickImage = this.add.image(this.cameras.main.width / 4 +50, this.cameras.main.height / 2 + 370, 'rick-7').setOrigin(0.5);
+        let bonusDescription = this.add.text(this.cameras.main.width / 4 * 2, this.cameras.main.height / 2 + 390, 'Récoltez la casquette et appuyez sur Ctrl pour utiliser le mode fou d\'Odin. Restez appuyé sur B pour débloquer un power-up spécial.', { font: '20px Arial', fill: '#000000', align: 'center', wordWrap: { width: 700, useAdvancedWrap: true } }).setOrigin(0.5);
+        
+        const backButton = this.add.image(100, 100, 'backButton').setInteractive().setScale(1.5);
+        backButton.on('pointerdown', () => this.scene.start(this.returnScene));
     }
 }
 
@@ -1016,7 +1059,7 @@ window.addEventListener('load', () => {
                 debug: false
             }
         },
-        scene: [PreloadScene, MenuScene, OptionsScene, MainScene, PausedScene]
+        scene: [PreloadScene, MenuScene, OptionsScene, MainScene, PausedScene, TutoScene]
 
     });
     window.addEventListener('resize', event => {
