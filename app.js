@@ -681,21 +681,28 @@ class MainScene extends Phaser.Scene {
     }
 
     hitEnemy(player, enemy) {
-      if (!player.superModeActive) {
-        if (player.body.touching.down && enemy.body.touching.up) {
+        if (player.superModeActive) {
           enemy.disableBody(true, true);
           this.sound.play('enemyDeath');
           this.enemiesCount -= 1;
-    
           if (this.score >= 60 && this.enemiesCount === 0) {
             this.victory();
           }
         } else {
-          this.sound.play('scream');
-          this.endGame("Les monstres vous ont dévorés");
-        } 
+          if (player.body.touching.down && enemy.body.touching.up) {
+            enemy.disableBody(true, true);
+            this.sound.play('enemyDeath');
+            this.enemiesCount -= 1;
+        
+            if (this.score >= 60 && this.enemiesCount === 0) {
+              this.victory();
+            }
+          } else {
+            this.sound.play('scream');
+            this.endGame("Les monstres vous ont dévorés");
+          } 
+        }
       }
-    }
 
     update() {
         if (this.timer >= 120) {
@@ -863,6 +870,7 @@ class Player extends Phaser.Physics.Arcade.Sprite {
         this.body.setSize(this.width, this.height);
         this.canJump = true;
         this.isJumping = false;
+        this.jumpCount = 2; // Ajout du compteur de sauts
         this.keyB = this.scene.input.keyboard.addKey(Phaser.Input.Keyboard.KeyCodes.B);
         this.keyCtrl = this.scene.input.keyboard.addKey(Phaser.Input.Keyboard.KeyCodes.CTRL);
         this.rickSong = this.scene.sound.add('rickSong');
@@ -877,7 +885,17 @@ this.hyperJump = false;
       if (this.body.blocked.down || this.body.touching.down) {
         this.canJump = true;
         this.isJumping = false;
+        this.jumpCount = 2;
       }
+
+      if (Phaser.Input.Keyboard.JustDown(cursors.up) && this.canJump && this.jumpCount > 0) {
+        const originalJumpState = -450 * 1.5;
+        this.setVelocityY((this.superModeActive && this.hyperJump) ? -1000 : originalJumpState);
+        this.isJumping = true;
+        this.canJump = false;
+        this.jumpCount--;
+    }
+
       if(!this.isRickAnimationPlaying) {
         const originalSpeedState = 160 * 2; 
         const superSpeedState = originalSpeedState * 3;
@@ -893,13 +911,6 @@ this.hyperJump = false;
         } else {
             this.setVelocityX(0);
             this.anims.play("playerIdle", true);
-        }
-
-        if (Phaser.Input.Keyboard.JustDown(cursors.up) && this.canJump) {
-            const originalJumpState = -450 * 1.5;
-            this.setVelocityY((this.superModeActive && this.hyperJump) ? -1000 : originalJumpState);
-            this.isJumping = true;
-            this.canJump = false;
         }
     }
   
