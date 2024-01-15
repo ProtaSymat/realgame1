@@ -729,35 +729,29 @@ class MainScene extends Phaser.Scene {
 
 
     touchDeathBlock(player, block) {
-      if (!player.superModeActive) {
-        if (block.texture.key === "block-death") {
+        if (!player.invincible) {
+          if (!player.superModeActive || block.texture.key === "block-death") {
             this.sound.play('explosion');
             this.endGame("Vous n'auriez pas dû toucher ce bloc");
+          }
         }
       }
-    }
-
-    hitEnemy(player, enemy) {
-        if (player.superModeActive) {
-          enemy.disableBody(true, true);
-          this.sound.play('enemyDeath');
-          this.enemiesCount -= 1;
-          if (this.score >= 60 && this.enemiesCount === 0) {
-            this.victory();
-          }
-        } else {
-          if (player.body.touching.down && enemy.body.touching.up) {
+      
+      hitEnemy(player, enemy) {
+        if (!player.invincible) {
+          if (player.superModeActive || 
+             (player.body.touching.down && enemy.body.touching.up)) {
+      
             enemy.disableBody(true, true);
             this.sound.play('enemyDeath');
             this.enemiesCount -= 1;
-        
             if (this.score >= 60 && this.enemiesCount === 0) {
               this.victory();
             }
           } else {
             this.sound.play('scream');
             this.endGame("Les monstres vous ont dévorés");
-          } 
+          }
         }
       }
 
@@ -925,9 +919,7 @@ class Player extends Phaser.Physics.Arcade.Sprite {
         this.setCollideWorldBounds(true);
         this.setScale(1.2, 1.2);
         this.body.setSize(this.width, this.height);
-        this.canJump = true;
-        this.isJumping = false;
-        this.jumpCount = 2; // Ajout du compteur de sauts
+        this.canDoubleJump = false;
         this.keyB = this.scene.input.keyboard.addKey(Phaser.Input.Keyboard.KeyCodes.B);
         this.keyCtrl = this.scene.input.keyboard.addKey(Phaser.Input.Keyboard.KeyCodes.CTRL);
         this.rickSong = this.scene.sound.add('rickSong');
@@ -935,23 +927,24 @@ class Player extends Phaser.Physics.Arcade.Sprite {
         this.inventory = new Inventory();
         this.isRickAnimationPlaying = false;
         this.superModeActive = false;
-this.hyperJump = false;
+        this.hyperJump = false;
+        this.invincible = false;
+        this.setInvincible();
     }
 
     update(cursors, keyB) {
-      if (this.body.blocked.down || this.body.touching.down) {
-        this.canJump = true;
-        this.isJumping = false;
-        this.jumpCount = 2;
-      }
-
-      if (Phaser.Input.Keyboard.JustDown(cursors.up) && this.canJump && this.jumpCount > 0) {
-        const originalJumpState = -450 * 1.5;
-        this.setVelocityY((this.superModeActive && this.hyperJump) ? -1000 : originalJumpState);
-        this.isJumping = true;
-        this.canJump = false;
-        this.jumpCount--;
+        const didPressJump = Phaser.Input.Keyboard.JustDown(cursors.up);
+        const originalJumpState = -425 * 1.5;
+    if (didPressJump && this.body.onFloor()) {
+        this.body.setVelocityY((this.superModeActive && this.hyperJump) ? -1000 : originalJumpState);
+        this.canDoubleJump = true;
+    } 
+    else if (this.canDoubleJump && didPressJump) { 
+        this.body.setVelocityY((this.superModeActive && this.hyperJump) ? -1000 : originalJumpState);
+        this.canDoubleJump = false;
     }
+  
+
 
       if(!this.isRickAnimationPlaying) {
         const originalSpeedState = 160 * 2; 
@@ -1019,6 +1012,13 @@ this.hyperJump = false;
       this.tint = 0xFFFFFF;
       this.crazyMagic.stop();
   }
+
+  setInvincible() {
+    this.invincible = true;
+    this.scene.time.delayedCall(3000, () => {
+        this.invincible = false;
+    }, [], this);
+}
 }
 function resizeGame(game) {
     const w = window.innerWidth;
