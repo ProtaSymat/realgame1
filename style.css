@@ -1,0 +1,14 @@
+::-webkit-scrollbar {
+    display: none;
+    }
+
+    body{
+        overflow-y: hidden;
+        overflow-x: hidden;
+        width:1730 !important; height:850 !important;
+        margin-bottom: 0px;
+        margin-right: 0px;
+        margin-top: 0px;
+        margin-left: 0px;
+        display:border-box;background: black;
+    }
