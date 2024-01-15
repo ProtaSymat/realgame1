@@ -726,33 +726,32 @@ class MainScene extends Phaser.Scene {
         this.cursors = this.input.keyboard.createCursorKeys();
         this.cameras.main.startFollow(this.player, true);
     }
-
-
     touchDeathBlock(player, block) {
         if (!player.invincible) {
-          if (!player.superModeActive || block.texture.key === "block-death") {
+          if (!player.superModeActive && block.texture.key === "block-death") {
             this.sound.play('explosion');
             this.endGame("Vous n'auriez pas dû toucher ce bloc");
           }
         }
       }
-      
+
       hitEnemy(player, enemy) {
-        if (!player.invincible) {
-          if (player.superModeActive || 
-             (player.body.touching.down && enemy.body.touching.up)) {
+          if (!player.invincible) {
+              if (player.superModeActive || 
+                 (player.body.touching.down && enemy.body.touching.up)) {
       
-            enemy.disableBody(true, true);
-            this.sound.play('enemyDeath');
-            this.enemiesCount -= 1;
-            if (this.score >= 60 && this.enemiesCount === 0) {
-              this.victory();
-            }
-          } else {
-            this.sound.play('scream');
-            this.endGame("Les monstres vous ont dévorés");
+                  enemy.disableBody(true, true);
+                  this.sound.play('enemyDeath');
+                  this.enemiesCount -= 1;
+                  if (this.score >= 60 && this.enemiesCount === 0) {
+                      this.victory();
+                  }
+
+              } else {
+                  this.sound.play('scream');
+                  this.endGame("Les monstres vous ont dévorés");
+              }
           }
-        }
       }
 
     update() {
